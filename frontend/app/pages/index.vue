@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-const { selectedPage, updateTitle, updateBody } = usePages()
+const {
+  selectedPage,
+  isUpdatingTitle,
+  isUpdatingBody,
+  isAnyBusy,
+  updateTitle,
+  updateBody,
+} = usePages()
 const { notify } = useNotification()
 const { isEditingTitle, isEditingBody } = usePageEditing()
-const { isSubmittingTitle, isSubmittingBody, isAnyBusy } = usePageOperations()
 
 const title = computed(() => selectedPage.value?.title ?? '')
 const body = computed(() => selectedPage.value?.body ?? '')
@@ -22,26 +28,19 @@ const canSaveBody = computed(
   () => isDraftBodyValid.value && !isAnyBusy.value,
 )
 
-// TODO: API連携時に置き換える
-const fakeApiCall = () => new Promise((resolve) => setTimeout(resolve, 1500))
-
 const startEditTitle = () => {
   draftTitle.value = title.value
 }
 const saveTitle = async () => {
   if (!selectedPage.value) return
   const pageId = selectedPage.value.id
-  isSubmittingTitle.value = true
   notify('送信しています…', { persistent: true })
   try {
-    await fakeApiCall()
-    updateTitle(pageId, draftTitle.value)
+    await updateTitle(pageId, draftTitle.value)
     isEditingTitle.value = false
     notify('タイトルの送信が完了しました', { color: 'success' })
   } catch {
     notify('タイトルの送信に失敗しました', { color: 'error' })
-  } finally {
-    isSubmittingTitle.value = false
   }
 }
 
@@ -51,17 +50,13 @@ const startEditBody = () => {
 const saveBody = async () => {
   if (!selectedPage.value) return
   const pageId = selectedPage.value.id
-  isSubmittingBody.value = true
   notify('送信しています…', { persistent: true })
   try {
-    await fakeApiCall()
-    updateBody(pageId, draftBody.value)
+    await updateBody(pageId, draftBody.value)
     isEditingBody.value = false
     notify('詳細の送信が完了しました', { color: 'success' })
   } catch {
     notify('詳細の送信に失敗しました', { color: 'error' })
-  } finally {
-    isSubmittingBody.value = false
   }
 }
 </script>
@@ -74,7 +69,7 @@ const saveBody = async () => {
         <div v-else class="page__title-edit">
           <input
             v-model="draftTitle"
-            :disabled="isSubmittingTitle"
+            :disabled="isUpdatingTitle"
             class="page__title-input"
             type="text"
           />
@@ -87,7 +82,7 @@ const saveBody = async () => {
         <EditActions
           v-model:editing="isEditingTitle"
           :can-save="canSaveTitle"
-          :submitting="isSubmittingTitle"
+          :submitting="isUpdatingTitle"
           @start="startEditTitle"
           @save="saveTitle"
         />
@@ -102,7 +97,7 @@ const saveBody = async () => {
         <div v-else class="page__content-edit">
           <textarea
             v-model="draftBody"
-            :disabled="isSubmittingBody"
+            :disabled="isUpdatingBody"
             class="page__content page__content--editing"
           />
           <p v-if="!isDraftBodyValid" class="page__validation-error">
@@ -114,7 +109,7 @@ const saveBody = async () => {
         <EditActions
           v-model:editing="isEditingBody"
           :can-save="canSaveBody"
-          :submitting="isSubmittingBody"
+          :submitting="isUpdatingBody"
           @start="startEditBody"
           @save="saveBody"
         />

@@ -1,46 +1,51 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Page } from '~/composables/usePages'
 
-type PageSummary = {
-  id: string
-  title: string
-}
-
-defineProps<{
-  pages: PageSummary[]
-  selectedId: string
-}>()
-
-const emit = defineEmits<{
-  'update:selectedId': [id: string]
-  add: []
-  delete: [id: string]
-}>()
-
-const isEditMode = ref(false)
+const {
+  pages,
+  selectedId,
+  selectedPage,
+  isDeleting,
+  isAnyBusy,
+  addPage,
+  deletePage,
+} = usePages()
 const { isEditing, exitEditing } = usePageEditing()
-const { isDeleting, isAnyBusy } = usePageOperations()
 const { notify } = useNotification()
 
+const isEditMode = ref(false)
+
 const isDeleteDialogOpen = ref(false)
-const pageToDelete = ref<PageSummary>()
+const pageToDelete = ref<Page>()
 
 // 編集中に他のページへ遷移しようとしたときの確認モーダル
 const isNavigationDialogOpen = ref(false)
-const pendingSelectId = ref<string>()
+const pendingSelectId = ref<number>()
 const isPendingAdd = ref(false)
 
-// TODO: API連携時に置き換える
-const fakeApiCall = () => new Promise((resolve) => setTimeout(resolve, 1500))
+const selectPage = (id: number) => {
+  selectedId.value = id
+}
 
-const onSelectPage = (id: string) => {
+const onSelectPage = (id: number) => {
   if (isEditing.value) {
     pendingSelectId.value = id
     isPendingAdd.value = false
     isNavigationDialogOpen.value = true
     return
   }
-  emit('update:selectedId', id)
+  selectPage(id)
+}
+
+const doAddPage = async () => {
+  notify('送信しています…', { persistent: true })
+  try {
+    await addPage()
+    notify('新しいページを作成しました', { color: 'success' })
+  } catch {
+    notify('ページの作成に失敗しました', { color: 'error' })
+  }
 }
 
 const onAddPage = () => {
@@ -50,15 +55,15 @@ const onAddPage = () => {
     isNavigationDialogOpen.value = true
     return
   }
-  emit('add')
+  doAddPage()
 }
 
 const confirmNavigation = () => {
   exitEditing()
   if (isPendingAdd.value) {
-    emit('add')
-  } else if (pendingSelectId.value) {
-    emit('update:selectedId', pendingSelectId.value)
+    doAddPage()
+  } else if (pendingSelectId.value !== undefined) {
+    selectPage(pendingSelectId.value)
   }
   pendingSelectId.value = undefined
   isPendingAdd.value = false
@@ -71,7 +76,7 @@ const cancelNavigation = () => {
   isNavigationDialogOpen.value = false
 }
 
-const requestDelete = (page: PageSummary) => {
+const requestDelete = (page: Page) => {
   pageToDelete.value = page
   isDeleteDialogOpen.value = true
 }
@@ -83,16 +88,12 @@ const cancelDelete = () => {
 const confirmDelete = async () => {
   if (!pageToDelete.value) return
   const id = pageToDelete.value.id
-  isDeleting.value = true
   try {
-    await fakeApiCall()
-    emit('delete', id)
+    await deletePage(id)
     isDeleteDialogOpen.value = false
     notify('ページの削除が完了しました', { color: 'success' })
   } catch {
     notify('ページの削除に失敗しました', { color: 'error' })
-  } finally {
-    isDeleting.value = false
   }
 }
 </script>
@@ -110,10 +111,10 @@ const confirmDelete = async () => {
       <v-list-item
         v-for="page in pages"
         :key="page.id"
-        :active="page.id === selectedId"
+        :active="page.id === selectedPage?.id"
         :class="[
           'sidebar__item',
-          { 'sidebar__item--active': page.id === selectedId },
+          { 'sidebar__item--active': page.id === selectedPage?.id },
         ]"
         @click="onSelectPage(page.id)"
       >

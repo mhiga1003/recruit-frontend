@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   devServer: {
     port: 8000,
   },
+  runtimeConfig: {
+    public: {
+      apiBase: 'http://localhost:3000',
+    },
+  },
   css: ['~/assets/styles/main.scss'],
   app: {
     head: {
