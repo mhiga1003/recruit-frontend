@@ -37,6 +37,8 @@ export default defineNuxtConfig({
             colors: {
               primary: '#4CB3F8',
               secondary: '#32A8F8',
+              success: '#43A047',
+              error: '#D32F2F',
               'on-primary': '#FFFFFF',
               'text-regular': '#333333',
               'text-light': '#4D4D4D',
