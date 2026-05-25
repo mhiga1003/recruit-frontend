@@ -27,3 +27,31 @@ API の Document は、
 ```bash
 $ cp ./data/bk-dev.sqlite ./data/dev.sqlite
 ```
+
+## フロントエンド
+
+フロントエンドは Nuxt 4 で実装し、`frontend/` ディレクトリに配置している。
+`http://localhost:8000` で起動する（バックエンドが起動している前提）。
+
+```bash
+$ cd frontend
+$ npm install
+$ npm run dev
+```
+
+ポートは [frontend/nuxt.config.ts](./frontend/nuxt.config.ts) の `devServer.port` で設定している。
+
+### Lint / Format
+
+```bash
+$ npm run lint         # ESLint チェック
+$ npm run lint:fix     # ESLint 自動修正
+$ npm run format       # Prettier 整形
+```
+
+### ビルド / プレビュー
+
+```bash
+$ npm run build        # 本番ビルド
+$ npm run preview      # ビルド結果をローカルで確認
+```
