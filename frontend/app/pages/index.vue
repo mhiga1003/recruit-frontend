@@ -1,37 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-const title = ref('坊ちゃん')
-const body = ref(
-  Array(6)
-    .fill(
-      '親譲りの無鉄砲で小供の時から損ばかりしている。小学校に居る時分学校の二階から飛び降りて一週間ほど腰を抜かした事がある。なぜそんな無闇をしたと聞く人があるかも知れぬ。別段深い理由でもない。新築の二階から首を出していたら、同級生の一人が冗談に、いくら威張っても、そこから飛び降りる事は出来まい。弱虫やーい。と囃したからである。小使に負ぶさって帰って来た時、おやじが大きな眼をして二階ぐらいから飛び降りて腰を抜かす奴があるかと云ったから、この次は抜かさずに飛んで見せますと答えた。',
-    )
-    .join('\n\n'),
-)
+const { selectedPage, updateTitle, updateBody } = usePages()
+const { notify } = useNotification()
+const { isEditingTitle, isEditingBody } = usePageEditing()
+const { isSubmittingTitle, isSubmittingBody, isAnyBusy } = usePageOperations()
 
-const isEditingTitle = ref(false)
-const isEditingBody = ref(false)
+const title = computed(() => selectedPage.value?.title ?? '')
+const body = computed(() => selectedPage.value?.body ?? '')
+
 const draftTitle = ref('')
 const draftBody = ref('')
-const isSubmittingTitle = ref(false)
-const isSubmittingBody = ref(false)
 
 const isDraftTitleValid = computed(() => isValidPageTitle(draftTitle.value))
 const isDraftBodyValid = computed(() => isValidPageBody(draftBody.value))
 
-const isAnySubmitting = computed(
-  () => isSubmittingTitle.value || isSubmittingBody.value,
-)
-
 const canSaveTitle = computed(
-  () => isDraftTitleValid.value && !isAnySubmitting.value,
+  () => isDraftTitleValid.value && !isAnyBusy.value,
 )
 const canSaveBody = computed(
-  () => isDraftBodyValid.value && !isAnySubmitting.value,
+  () => isDraftBodyValid.value && !isAnyBusy.value,
 )
-
-const { notify } = useNotification()
 
 // TODO: API連携時に置き換える
 const fakeApiCall = () => new Promise((resolve) => setTimeout(resolve, 1500))
@@ -40,11 +29,13 @@ const startEditTitle = () => {
   draftTitle.value = title.value
 }
 const saveTitle = async () => {
+  if (!selectedPage.value) return
+  const pageId = selectedPage.value.id
   isSubmittingTitle.value = true
   notify('送信しています…', { persistent: true })
   try {
     await fakeApiCall()
-    title.value = draftTitle.value
+    updateTitle(pageId, draftTitle.value)
     isEditingTitle.value = false
     notify('タイトルの送信が完了しました', { color: 'success' })
   } catch {
@@ -58,11 +49,13 @@ const startEditBody = () => {
   draftBody.value = body.value
 }
 const saveBody = async () => {
+  if (!selectedPage.value) return
+  const pageId = selectedPage.value.id
   isSubmittingBody.value = true
   notify('送信しています…', { persistent: true })
   try {
     await fakeApiCall()
-    body.value = draftBody.value
+    updateBody(pageId, draftBody.value)
     isEditingBody.value = false
     notify('詳細の送信が完了しました', { color: 'success' })
   } catch {
@@ -75,16 +68,22 @@ const saveBody = async () => {
 
 <template>
   <div class="page">
-    <section class="page__body">
+    <section class="page__main">
       <div class="page__title-row">
         <h1 v-if="!isEditingTitle" class="page__title">{{ title }}</h1>
-        <input
-          v-else
-          v-model="draftTitle"
-          :disabled="isSubmittingTitle"
-          class="page__title-input"
-          type="text"
-        />
+        <div v-else class="page__title-edit">
+          <input
+            v-model="draftTitle"
+            :disabled="isSubmittingTitle"
+            class="page__title-input"
+            type="text"
+          />
+          <p v-if="!isDraftTitleValid" class="page__validation-error">
+            タイトルは{{ PAGE_TITLE_MIN_LENGTH }}文字以上{{
+              PAGE_TITLE_MAX_LENGTH
+            }}文字以下の文字列である必要があります。
+          </p>
+        </div>
         <EditActions
           v-model:editing="isEditingTitle"
           :can-save="canSaveTitle"
@@ -100,12 +99,18 @@ const saveBody = async () => {
             {{ paragraph }}
           </p>
         </article>
-        <textarea
-          v-else
-          v-model="draftBody"
-          :disabled="isSubmittingBody"
-          class="page__content page__content--editing"
-        />
+        <div v-else class="page__content-edit">
+          <textarea
+            v-model="draftBody"
+            :disabled="isSubmittingBody"
+            class="page__content page__content--editing"
+          />
+          <p v-if="!isDraftBodyValid" class="page__validation-error">
+            詳細は{{ PAGE_BODY_MIN_LENGTH }}文字以上{{
+              PAGE_BODY_MAX_LENGTH
+            }}文字以下の文字列である必要があります。
+          </p>
+        </div>
         <EditActions
           v-model:editing="isEditingBody"
           :can-save="canSaveBody"
@@ -147,8 +152,14 @@ const saveBody = async () => {
     color: c.$text-regular;
   }
 
-  &__title-input {
+  &__title-edit {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__title-input {
     font-size: 24px;
     font-weight: 700;
     color: c.$text-regular;
@@ -163,7 +174,13 @@ const saveBody = async () => {
     }
   }
 
-  &__body {
+  &__validation-error {
+    padding-left: 30px;
+    font-size: 12px;
+    color: c.$error;
+  }
+
+  &__main {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -182,6 +199,14 @@ const saveBody = async () => {
     :deep(.edit-actions) {
       align-self: flex-start;
     }
+  }
+
+  &__content-edit {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 4px;
   }
 
   &__content {
