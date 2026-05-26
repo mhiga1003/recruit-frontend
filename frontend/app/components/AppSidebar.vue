@@ -99,7 +99,7 @@ const confirmDelete = async () => {
 </script>
 
 <template>
-  <v-navigation-drawer permanent width="280" color="white" class="sidebar">
+  <aside class="sidebar">
     <div class="sidebar__header">
       <div class="sidebar__logo">
         <span class="sidebar__logo-mark">S</span>
@@ -133,16 +133,14 @@ const confirmDelete = async () => {
       </v-list-item>
     </v-list>
 
-    <template #append>
-      <div class="sidebar__footer">
-        <SidebarFooterButton
-          v-model:edit-mode="isEditMode"
-          :can-add="!isAnyBusy"
-          @add="onAddPage"
-        />
-      </div>
-    </template>
-  </v-navigation-drawer>
+    <div class="sidebar__footer">
+      <SidebarFooterButton
+        v-model:edit-mode="isEditMode"
+        :can-add="!isAnyBusy"
+        @add="onAddPage"
+      />
+    </div>
+  </aside>
 
   <v-dialog v-model="isNavigationDialogOpen" max-width="400">
     <v-card class="delete-dialog">
@@ -192,7 +190,16 @@ const confirmDelete = async () => {
 @use '~/assets/styles/colors' as c;
 
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
   border-right: 1px solid c.$border-light;
+  z-index: 1;
 
   &__header {
     padding: 30px 30px 20px;
@@ -224,6 +231,8 @@ const confirmDelete = async () => {
   }
 
   &__list {
+    flex: 1;
+    overflow-y: auto;
     padding: 0 0 0 10px;
   }
 

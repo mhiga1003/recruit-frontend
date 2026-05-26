@@ -5,7 +5,7 @@ const { message, visible, timeout, color } = useNotification()
 <template>
   <v-app>
     <AppSidebar />
-    <v-main class="bg-white">
+    <v-main class="main bg-white">
       <slot />
     </v-main>
     <v-snackbar v-model="visible" :timeout="timeout" :color="color">
@@ -13,3 +13,9 @@ const { message, visible, timeout, color } = useNotification()
     </v-snackbar>
   </v-app>
 </template>
+
+<style scoped lang="scss">
+.main {
+  padding-left: 280px;
+}
+</style>
