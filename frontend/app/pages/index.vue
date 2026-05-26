@@ -89,11 +89,12 @@ const saveBody = async () => {
       </div>
 
       <div class="page__content-row">
-        <article v-if="!isEditingBody" class="page__content">
-          <p v-for="(paragraph, i) in body.split('\n\n')" :key="i">
-            {{ paragraph }}
-          </p>
-        </article>
+        <textarea
+          v-if="!isEditingBody"
+          :value="body"
+          readonly
+          class="page__content page__content--readonly"
+        />
         <div v-else class="page__content-edit">
           <textarea
             v-model="draftBody"
@@ -213,10 +214,15 @@ const saveBody = async () => {
     font-size: 16px;
     line-height: 1.8;
     color: c.$text-regular;
+  }
 
-    p + p {
-      margin-top: 1.5em;
-    }
+  &__content--readonly {
+    display: block;
+    width: 100%;
+    border: none;
+    font-family: inherit;
+    resize: none;
+    outline: none;
   }
 
   &__content--editing {
