@@ -102,7 +102,13 @@ const confirmDelete = async () => {
   <aside class="sidebar">
     <div class="sidebar__header">
       <div class="sidebar__logo">
-        <span class="sidebar__logo-mark">S</span>
+        <img
+          src="/logo.svg"
+          alt=""
+          width="32"
+          height="32"
+          class="sidebar__logo-mark"
+        />
         <span class="sidebar__logo-text">ServiceName</span>
       </div>
     </div>
@@ -121,14 +127,16 @@ const confirmDelete = async () => {
         <v-list-item-title>{{ page.title }}</v-list-item-title>
         <template v-if="isEditMode" #append>
           <v-btn
-            icon="mdi-delete"
+            icon
             variant="text"
             size="small"
             color="button-normal"
             :disabled="isAnyBusy"
             class="sidebar__delete-btn"
             @click.stop="requestDelete(page)"
-          />
+          >
+            <img src="/delete.svg" alt="削除" width="18" height="18" />
+          </v-btn>
         </template>
       </v-list-item>
     </v-list>

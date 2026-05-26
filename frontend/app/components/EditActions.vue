@@ -43,7 +43,13 @@ const handleSave = () => {
       @click="handleStart"
     >
       <span class="edit-actions__inner">
-        <v-icon icon="mdi-pencil" class="edit-actions__icon" />
+        <img
+          src="/edit.svg"
+          alt=""
+          width="18"
+          height="18"
+          class="edit-actions__icon"
+        />
         <span class="edit-actions__label">Edit</span>
       </span>
     </v-btn>
@@ -58,7 +64,13 @@ const handleSave = () => {
         @click="handleCancel"
       >
         <span class="edit-actions__inner">
-          <v-icon icon="mdi-close" class="edit-actions__icon" />
+          <img
+            src="/cancel.svg"
+            alt=""
+            width="18"
+            height="18"
+            class="edit-actions__icon"
+          />
           <span class="edit-actions__label">Cancel</span>
         </span>
       </v-btn>
@@ -72,7 +84,13 @@ const handleSave = () => {
         @click="handleSave"
       >
         <span class="edit-actions__inner">
-          <v-icon icon="mdi-content-save" class="edit-actions__icon" />
+          <img
+            src="/save.svg"
+            alt=""
+            width="18"
+            height="18"
+            class="edit-actions__icon"
+          />
           <span class="edit-actions__label">Save</span>
         </span>
       </v-btn>

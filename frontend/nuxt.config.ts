@@ -23,6 +23,11 @@ export default defineNuxtConfig({
     head: {
       link: [
         {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: '/logo.svg',
+        },
+        {
           rel: 'preconnect',
           href: 'https://fonts.googleapis.com',
         },

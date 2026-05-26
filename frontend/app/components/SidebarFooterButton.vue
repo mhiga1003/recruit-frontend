@@ -32,7 +32,13 @@ const onAdd = () => emit('add')
       @click="onEnter"
     >
       <span class="sidebar-footer-btn__inner">
-        <v-icon icon="mdi-pencil" class="sidebar-footer-btn__icon" />
+        <img
+          src="/edit.svg"
+          alt=""
+          width="18"
+          height="18"
+          class="sidebar-footer-btn__icon"
+        />
         <span class="sidebar-footer-btn__label">Edit</span>
       </span>
     </v-btn>
@@ -48,7 +54,13 @@ const onAdd = () => emit('add')
         @click="onAdd"
       >
         <span class="sidebar-footer-btn__inner">
-          <v-icon icon="mdi-plus" class="sidebar-footer-btn__icon" />
+          <img
+            src="/+.svg"
+            alt=""
+            width="18"
+            height="18"
+            class="sidebar-footer-btn__icon"
+          />
           <span class="sidebar-footer-btn__label">New page</span>
         </span>
       </v-btn>
@@ -62,7 +74,13 @@ const onAdd = () => emit('add')
         @click="onExit"
       >
         <span class="sidebar-footer-btn__inner">
-          <v-icon icon="mdi-check" class="sidebar-footer-btn__icon" />
+          <img
+            src="/done.svg"
+            alt=""
+            width="18"
+            height="18"
+            class="sidebar-footer-btn__icon"
+          />
           <span class="sidebar-footer-btn__label">Done</span>
         </span>
       </v-btn>
